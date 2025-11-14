@@ -1,3 +1,8 @@
+/* RPC Client - Sends arithmetic operation to Server
+   Author: Vandanapu Saidhiraj
+   Date: 10-11-2025
+*/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -8,13 +13,26 @@
 
 int main(int argc, char *argv[])
 {
+    if (argc < 2)
+    {
+        printf("Usage: client <cmd>\nCommands: add, sub, mul, div\n");
+        return 1;
+    }
+
+    char cmd_buf[5]; // 4 chars + null terminator
+    memset(cmd_buf, 0, sizeof(cmd_buf));
+    strncpy(cmd_buf, argv[1], 4);
+
+    int a, b, result;
+
+    printf("Enter two numbers: ");
+    scanf("%d %d", &a, &b);
+
     WSADATA wsaData;
     WSAStartup(MAKEWORD(2, 2), &wsaData);
 
     SOCKET sockfd;
     struct sockaddr_in server_addr;
-    int a, b, result;
-    scanf("%d %d", &a, &b);
 
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if (sockfd == INVALID_SOCKET)
@@ -36,11 +54,10 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    char *cmd = argv[1];
     int na = htonl(a);
     int nb = htonl(b);
 
-    send(sockfd, cmd, 4, 0);
+    send(sockfd, cmd_buf, sizeof(cmd_buf), 0);
     send(sockfd, (char *)&na, sizeof(na), 0);
     send(sockfd, (char *)&nb, sizeof(nb), 0);
 

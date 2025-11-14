@@ -1,7 +1,8 @@
-/* Code to implement RPC in same machine
-    Author: Vandanapu Saidhiraj
-    Client code: Client.c
-    copyright reserved 10-11-2025*/
+/* RPC Server - Arithmetic Operations
+   Author: Vandanapu Saidhiraj
+   Date: 10-11-2025
+*/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -31,7 +32,8 @@ int main()
     SOCKET server_fd, client_fd;
     struct sockaddr_in addr, clientAddr;
     int addrLen = sizeof(clientAddr);
-    char cmd[4];
+
+    char cmd[5]; // 4 chars + null
     int a, b, result;
 
     server_fd = socket(AF_INET, SOCK_STREAM, 0);
@@ -61,6 +63,8 @@ int main()
         return 1;
     }
 
+    printf("Server running... Waiting for RPC client.\n");
+
     client_fd = accept(server_fd, (struct sockaddr *)&clientAddr, &addrLen);
     if (client_fd == INVALID_SOCKET)
     {
@@ -70,7 +74,9 @@ int main()
         return 1;
     }
 
+    memset(cmd, 0, sizeof(cmd));
     recv(client_fd, cmd, sizeof(cmd), 0);
+
     recv(client_fd, (char *)&a, sizeof(a), 0);
     recv(client_fd, (char *)&b, sizeof(b), 0);
 
@@ -81,6 +87,9 @@ int main()
     result = htonl(result);
 
     send(client_fd, (char *)&result, sizeof(result), 0);
+
+    printf("Operation '%s' performed on (%d, %d). Result = %d\n",
+           cmd, a, b, ntohl(result));
 
     closesocket(client_fd);
     closesocket(server_fd);
