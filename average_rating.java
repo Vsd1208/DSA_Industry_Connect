@@ -1,39 +1,35 @@
 import java.util.*;
 
 public class average_rating {
+    public static double updateAverage(double currentAvg, double newValue, int count) {
+        return currentAvg + (newValue - currentAvg) / count;
+    }
+
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
-        // Map<Double, Integer> rating = new HashMap<>();
-        // System.out.print("Enter number of users: ");
+        Map<String, double[]> productData = new HashMap<>();
+
+        System.out.print("Enter number of entries: ");
         int n = sc.nextInt();
-        // if (n <= 0) {
-        // System.out.println("No ratings available.");
-        // return;
-        // }
-        // for (int i = 0; i < n; i++) {
-        // System.out.print("Enter rating::");
-        // double r = sc.nextDouble();
-        // if (r < 1 || r > 5) {
-        // System.out.println("Invalid rating");
-        // i--;
-        // continue;
-        // }
-        // rating.put(r, rating.getOrDefault(r, 0) + 1);
-        // }
-        // double sum = 0;
-        // int totalCount = 0;
-        // for (Map.Entry<Double, Integer> entry : rating.entrySet()) {
-        // sum += entry.getKey() * entry.getValue();
-        // totalCount += entry.getValue();
-        // }
-        // double average = sum / totalCount;
-        // System.out.printf("Average Product Rating: %.2f\n", average);
-        // sc.close();
-        double avg = 0;
-        for (int i = 1; i <= n; i++) {
-            double k = sc.nextDouble();
-            avg += (k - avg) / i;
-            System.out.println(avg);
+        sc.nextLine();
+        for (int i = 0; i < n; i++) {
+            System.out.print("\nEnter product name: ");
+            String product = sc.nextLine();
+            System.out.print("Enter the rating of the product: ");
+            double value = sc.nextDouble();
+            sc.nextLine();
+            productData.putIfAbsent(product, new double[] { 0, 0 });
+            double[] data = productData.get(product);
+            int count = (int) data[0] + 1;
+            double avg = updateAverage(data[1], value, count);
+            data[0] = count;
+            data[1] = avg;
+            System.out.printf("Current average of %s: %.2f%n", product, avg);
         }
+        System.out.println("\nFinal Average per Product:");
+        for (Map.Entry<String, double[]> entry : productData.entrySet()) {
+            System.out.printf("%s -> %.2f%n", entry.getKey(), entry.getValue()[1]);
+        }
+        sc.close();
     }
 }
