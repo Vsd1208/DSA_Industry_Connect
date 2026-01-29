@@ -91,7 +91,8 @@ class MergeSortedArrays1 {
 
         int[] a = { 1, 3, 7, 9 }; // must be sorted
         int[] b = { 2, 4, 6, 8 }; // must be sorted
-
+        // int[] a = { 5, 1, 9, 3 };
+        // int[] b = { 8, 2, 6, 4 };
         int[] merged = new int[a.length + b.length];
         int k = 0;
 
