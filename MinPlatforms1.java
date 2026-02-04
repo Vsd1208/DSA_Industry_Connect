@@ -98,9 +98,9 @@ class MinPlatforms1 {
     public static void main(String[] args) {
         int[][] timings = {
                 { 900, 910 },
-                { 940, 1200 },
-                { 950, 1120 },
-                { 1100, 1130 },
+                { 940, 1200 }, // 1st platform reused
+                { 950, 1120 }, // 2nd platform used
+                { 1100, 1130 }, // 3rd platform used
                 { 1500, 1900 },
                 { 1800, 2000 }
         };
