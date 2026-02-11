@@ -1,6 +1,6 @@
 import java.util.*;
 
-class Level_Order {
+class Level_Order2 {
     private class Tree {
         int data;
         Tree left;
@@ -20,12 +20,17 @@ class Level_Order {
             ans.add(new ArrayList<>());
         }
         ans.get(level).add(root.data);
-        levelorder(root.left, level + 1, ans);
-        levelorder(root.right, level + 1, ans);
+        if (level % 2 != 0) {
+            levelorder(root.left, level + 1, ans);
+            levelorder(root.right, level + 1, ans);
+        } else {
+            levelorder(root.right, level + 1, ans);
+            levelorder(root.left, level + 1, ans);
+        }
     }
 
     public static void main(String[] args) {
-        Level_Order obj = new Level_Order();
+        Level_Order2 obj = new Level_Order2();
         Tree root = obj.new Tree(1);
         root.left = obj.new Tree(2);
         root.right = obj.new Tree(3);
