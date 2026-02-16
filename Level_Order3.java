@@ -1,7 +1,6 @@
 import java.util.*;
 
 class Level_Order3 {
-
     private class Tree {
         int data;
         Tree left, right;
