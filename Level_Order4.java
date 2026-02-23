@@ -84,8 +84,9 @@ class Level_Order4 {
 
             if (l < size &&
                     (h[l].level < h[smallest].level ||
-                            (h[l].level == h[smallest].level && h[l].index < h[smallest].index))) { // if level is same compare index
-                            smallest = l;
+                            (h[l].level == h[smallest].level && h[l].index < h[smallest].index))) { // if level is same
+                                                                                                    // compare index
+                smallest = l;
             }
 
             if (r < size &&
@@ -103,26 +104,46 @@ class Level_Order4 {
     private void levelOrderWithHeap(Tree root, Heap heap) {
         if (root == null)
             return;
+
         Queue<Tree> q = new LinkedList<>();
         q.add(root);
+
         int level = 0;
-        int index = 0;
+        int globalIndex = 0;
+
         while (!q.isEmpty()) {
             int size = q.size();
+            Tree[] levelNodes = new Tree[size];
             for (int i = 0; i < size; i++) {
-                Tree temp = q.poll();// Remove front of queue
-                Node node = new Node();
-                node.data = temp.data;
-                node.level = level;
-                node.index = index++;
-                heap.insert(node);
+                Tree temp = q.poll();
+                levelNodes[i] = temp;
                 if (temp.left != null)
-                    q.add(temp.left); // Add left child to queue
+                    q.add(temp.left);
                 if (temp.right != null)
                     q.add(temp.right);
             }
+            if (level % 2 == 0) {
+                // Left to Right
+                for (int i = 0; i < size; i++) {
+                    Node node = new Node();
+                    node.data = levelNodes[i].data;
+                    node.level = level;
+                    node.index = globalIndex++;
+                    heap.insert(node);
+                }
+            } else {
+                // Right to Left
+                for (int i = size - 1; i >= 0; i--) {
+                    Node node = new Node();
+                    node.data = levelNodes[i].data;
+                    node.level = level;
+                    node.index = globalIndex++;
+                    heap.insert(node);
+                }
+            }
             level++;
         }
+
         while (heap.size > 0) {
             Node node = heap.extractMin();
             System.out.print(node.data + " ");

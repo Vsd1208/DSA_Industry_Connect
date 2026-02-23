@@ -119,9 +119,14 @@ class Level_Order5 {
             heap.insert(node);
             return;
         }
-
-        collectLevel(root.left, targetLevel, currentLevel + 1, heap, index);
-        collectLevel(root.right, targetLevel, currentLevel + 1, heap, index);
+        // Zigzag logic
+        if (targetLevel % 2 == 0) {
+            collectLevel(root.left, targetLevel, currentLevel + 1, heap, index);
+            collectLevel(root.right, targetLevel, currentLevel + 1, heap, index);
+        } else {
+            collectLevel(root.right, targetLevel, currentLevel + 1, heap, index);
+            collectLevel(root.left, targetLevel, currentLevel + 1, heap, index);
+        }
     }
 
     // Level order using recursion
