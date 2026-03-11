@@ -32,7 +32,7 @@ class AVL_Tree {
 
         int balance = getBalance(node);
 
-        if (balance > 1 && key < node.left.value) {
+        if (balance > 1 && key < node.left.value) { // balance is 2
             System.out.println("LL Rotation at node " + node.value);
             return rightRotate(node);
         }
