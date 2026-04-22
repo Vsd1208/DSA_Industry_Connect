@@ -1,0 +1,1179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Improving the Passport Office Registration Experience through Storytelling</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+  :root {
+    --bg: #FAF7F2;
+    --fg: #1A1A1A;
+    --muted: #7A7062;
+    --accent: #0D7C66;
+    --accent-light: #E8F5F1;
+    --warm: #E8573A;
+    --warm-light: #FFF0EC;
+    --gold: #D4A843;
+    --card: #FFFFFF;
+    --border: #E8E2D9;
+    --shadow: rgba(26,26,26,0.08);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--fg);
+    overflow: hidden;
+    height: 100vh;
+    width: 100vw;
+  }
+
+  /* Background texture */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: radial-gradient(circle at 20% 80%, rgba(13,124,102,0.04) 0%, transparent 50%),
+                      radial-gradient(circle at 80% 20%, rgba(232,87,58,0.03) 0%, transparent 50%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .presentation {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    z-index: 1;
+  }
+
+  /* Progress bar */
+  .progress-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--accent), var(--gold));
+    transition: width 0.6s cubic-bezier(0.4,0,0.2,1);
+    z-index: 100;
+    border-radius: 0 2px 2px 0;
+  }
+
+  /* Slide dots */
+  .slide-dots {
+    position: fixed;
+    bottom: 32px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    gap: 12px;
+    z-index: 100;
+  }
+
+  .slide-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--border);
+    border: none;
+    cursor: pointer;
+    transition: all 0.4s ease;
+    position: relative;
+  }
+
+  .slide-dot.active {
+    background: var(--accent);
+    width: 32px;
+    border-radius: 5px;
+  }
+
+  .slide-dot:hover:not(.active) {
+    background: var(--muted);
+  }
+
+  /* Navigation arrows */
+  .nav-arrow {
+    position: fixed;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    background: var(--card);
+    color: var(--fg);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    transition: all 0.3s ease;
+    z-index: 100;
+    box-shadow: 0 2px 12px var(--shadow);
+  }
+
+  .nav-arrow:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    box-shadow: 0 4px 20px rgba(13,124,102,0.15);
+    transform: translateY(-50%) scale(1.08);
+  }
+
+  .nav-arrow.prev { left: 24px; }
+  .nav-arrow.next { right: 24px; }
+  .nav-arrow:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+    transform: translateY(-50%);
+  }
+
+  /* Slide counter */
+  .slide-counter {
+    position: fixed;
+    top: 28px;
+    right: 32px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--muted);
+    z-index: 100;
+    letter-spacing: 0.5px;
+  }
+
+  .slide-counter span { color: var(--accent); font-weight: 700; font-size: 15px; }
+
+  /* Title tag */
+  .title-tag {
+    position: fixed;
+    top: 24px;
+    left: 32px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--accent);
+    z-index: 100;
+    opacity: 0.7;
+  }
+
+  /* Slide */
+  .slide {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 80px 100px;
+    opacity: 0;
+    transform: translateX(60px);
+    transition: all 0.7s cubic-bezier(0.4,0,0.2,1);
+    pointer-events: none;
+  }
+
+  .slide.active {
+    opacity: 1;
+    transform: translateX(0);
+    pointer-events: all;
+  }
+
+  .slide.exit-left {
+    opacity: 0;
+    transform: translateX(-60px);
+  }
+
+  .slide-inner {
+    display: flex;
+    align-items: center;
+    gap: 64px;
+    max-width: 1200px;
+    width: 100%;
+  }
+
+  .slide-content {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .slide-visual {
+    flex: 0 0 420px;
+    height: 380px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .slide-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    color: var(--accent);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .slide-label::before {
+    content: '';
+    width: 24px;
+    height: 2px;
+    background: var(--accent);
+    border-radius: 1px;
+  }
+
+  .slide-title {
+    font-family: 'DM Serif Display', serif;
+    font-size: 38px;
+    line-height: 1.2;
+    color: var(--fg);
+    margin-bottom: 20px;
+    letter-spacing: -0.5px;
+  }
+
+  .slide-text {
+    font-size: 16px;
+    line-height: 1.75;
+    color: var(--muted);
+    max-width: 480px;
+  }
+
+  .slide-text strong { color: var(--fg); font-weight: 600; }
+
+  /* Stat cards for slide 1 */
+  .stat-row {
+    display: flex;
+    gap: 16px;
+    margin-top: 24px;
+  }
+
+  .stat-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px 20px;
+    flex: 1;
+    box-shadow: 0 2px 8px var(--shadow);
+    transition: transform 0.3s ease;
+  }
+
+  .stat-card:hover { transform: translateY(-2px); }
+
+  .stat-number {
+    font-family: 'DM Serif Display', serif;
+    font-size: 28px;
+    color: var(--warm);
+    line-height: 1;
+  }
+
+  .stat-label {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 4px;
+    font-weight: 500;
+  }
+
+  /* Pain point cards for slide 3 */
+  .pain-cards {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 20px;
+  }
+
+  .pain-card {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: var(--warm-light);
+    border-radius: 10px;
+    padding: 14px 18px;
+    border-left: 3px solid var(--warm);
+    transition: transform 0.3s ease;
+  }
+
+  .pain-card:hover { transform: translateX(4px); }
+
+  .pain-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    background: var(--warm);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+
+  .pain-text {
+    font-size: 14px;
+    color: var(--fg);
+    font-weight: 500;
+  }
+
+  /* Solution cards for slide 4 */
+  .solution-cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 20px;
+  }
+
+  .solution-card {
+    background: var(--accent-light);
+    border-radius: 10px;
+    padding: 14px 16px;
+    border-left: 3px solid var(--accent);
+    transition: transform 0.3s ease;
+  }
+
+  .solution-card:hover { transform: translateY(-2px); }
+
+  .solution-card i {
+    color: var(--accent);
+    font-size: 16px;
+    margin-bottom: 6px;
+    display: block;
+  }
+
+  .solution-card .s-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--fg);
+    margin-bottom: 2px;
+  }
+
+  .solution-card .s-desc {
+    font-size: 11px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  /* POV slide */
+  .pov-box {
+    background: linear-gradient(135deg, var(--accent), #0a5f4d);
+    border-radius: 16px;
+    padding: 32px;
+    color: white;
+    margin-top: 24px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .pov-box::before {
+    content: '';
+    position: absolute;
+    top: -30px;
+    right: -30px;
+    width: 120px;
+    height: 120px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 50%;
+  }
+
+  .pov-box::after {
+    content: '';
+    position: absolute;
+    bottom: -20px;
+    left: 40%;
+    width: 80px;
+    height: 80px;
+    background: rgba(255,255,255,0.05);
+    border-radius: 50%;
+  }
+
+  .pov-statement {
+    font-family: 'DM Serif Display', serif;
+    font-size: 22px;
+    line-height: 1.5;
+    position: relative;
+    z-index: 1;
+  }
+
+  .benefit-row {
+    display: flex;
+    gap: 12px;
+    margin-top: 20px;
+    flex-wrap: wrap;
+  }
+
+  .benefit-tag {
+    background: rgba(255,255,255,0.15);
+    border: 1px solid rgba(255,255,255,0.2);
+    border-radius: 20px;
+    padding: 8px 16px;
+    font-size: 13px;
+    font-weight: 500;
+    color: white;
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  /* ========== SVG ANIMATIONS ========== */
+  .scene-svg {
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+  }
+
+  /* Slide 1: Passport office queue scene */
+  @keyframes floatUp {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
+  }
+
+  @keyframes fadeSlideIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.15); opacity: 0.7; }
+  }
+
+  @keyframes clockSpin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  @keyframes sway {
+    0%, 100% { transform: rotate(-2deg); }
+    50% { transform: rotate(2deg); }
+  }
+
+  @keyframes bounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+  }
+
+  @keyframes drawLine {
+    from { stroke-dashoffset: 100; }
+    to { stroke-dashoffset: 0; }
+  }
+
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-3px); }
+    40% { transform: translateX(3px); }
+    60% { transform: translateX(-2px); }
+    80% { transform: translateX(2px); }
+  }
+
+  @keyframes slideUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes glowPulse {
+    0%, 100% { filter: drop-shadow(0 0 4px rgba(13,124,102,0.3)); }
+    50% { filter: drop-shadow(0 0 12px rgba(13,124,102,0.6)); }
+  }
+
+  @keyframes checkDraw {
+    from { stroke-dashoffset: 30; }
+    to { stroke-dashoffset: 0; }
+  }
+
+  @keyframes starPop {
+    0% { transform: scale(0) rotate(-30deg); opacity: 0; }
+    60% { transform: scale(1.2) rotate(5deg); opacity: 1; }
+    100% { transform: scale(1) rotate(0deg); opacity: 1; }
+  }
+
+  .anim-float { animation: floatUp 3s ease-in-out infinite; }
+  .anim-float-d1 { animation: floatUp 3s ease-in-out 0.3s infinite; }
+  .anim-float-d2 { animation: floatUp 3s ease-in-out 0.6s infinite; }
+  .anim-float-d3 { animation: floatUp 3s ease-in-out 0.9s infinite; }
+  .anim-pulse { animation: pulse 2s ease-in-out infinite; }
+  .anim-sway { animation: sway 2.5s ease-in-out infinite; }
+  .anim-bounce { animation: bounce 2s ease-in-out infinite; }
+  .anim-shake { animation: shake 0.8s ease-in-out infinite; }
+  .anim-glow { animation: glowPulse 2s ease-in-out infinite; }
+
+  .slide.active .anim-slide-up {
+    animation: slideUp 0.6s ease-out forwards;
+  }
+  .slide.active .anim-slide-up-d1 {
+    animation: slideUp 0.6s ease-out 0.15s forwards;
+    opacity: 0;
+  }
+  .slide.active .anim-slide-up-d2 {
+    animation: slideUp 0.6s ease-out 0.3s forwards;
+    opacity: 0;
+  }
+  .slide.active .anim-slide-up-d3 {
+    animation: slideUp 0.6s ease-out 0.45s forwards;
+    opacity: 0;
+  }
+
+  .slide.active .anim-star-1 { animation: starPop 0.5s ease-out 0.2s forwards; opacity: 0; transform: scale(0); }
+  .slide.active .anim-star-2 { animation: starPop 0.5s ease-out 0.4s forwards; opacity: 0; transform: scale(0); }
+  .slide.active .anim-star-3 { animation: starPop 0.5s ease-out 0.6s forwards; opacity: 0; transform: scale(0); }
+
+  .slide.active .anim-check {
+    stroke-dasharray: 30;
+    animation: checkDraw 0.6s ease-out 0.5s forwards;
+    stroke-dashoffset: 30;
+  }
+
+  /* Responsive */
+  @media (max-width: 900px) {
+    .slide { padding: 80px 40px; }
+    .slide-inner { flex-direction: column; gap: 32px; }
+    .slide-visual { flex: none; width: 100%; height: 260px; }
+    .slide-title { font-size: 28px; }
+    .stat-row { flex-wrap: wrap; }
+    .solution-cards { grid-template-columns: 1fr; }
+    .nav-arrow { display: none; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="progress-bar" id="progressBar"></div>
+<div class="title-tag">Design Thinking Presentation</div>
+<div class="slide-counter"><span id="currentNum">1</span> / 5</div>
+
+<button class="nav-arrow prev" id="prevBtn" aria-label="Previous slide"><i class="fas fa-chevron-left"></i></button>
+<button class="nav-arrow next" id="nextBtn" aria-label="Next slide"><i class="fas fa-chevron-right"></i></button>
+
+<div class="slide-dots" id="slideDots"></div>
+
+<div class="presentation" id="presentation">
+
+  <!-- ===== SLIDE 1: Problem ===== -->
+  <div class="slide active" data-slide="0">
+    <div class="slide-inner">
+      <div class="slide-content">
+        <div class="slide-label anim-slide-up">Slide 01 — Problem</div>
+        <h1 class="slide-title anim-slide-up-d1">The Passport Office<br>Is Broken</h1>
+        <p class="slide-text anim-slide-up-d2">
+          Every year, <strong>millions of citizens</strong> apply for passports. Yet the registration process remains confusing, time-consuming, and emotionally draining — especially for <strong>first-time applicants</strong> like students and young professionals.
+        </p>
+        <div class="stat-row anim-slide-up-d3">
+          <div class="stat-card">
+            <div class="stat-number">3–5 hrs</div>
+            <div class="stat-label">Average wait time</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number">62%</div>
+            <div class="stat-label">Repeated visits</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-number">8+</div>
+            <div class="stat-label">Documents required</div>
+          </div>
+        </div>
+      </div>
+      <div class="slide-visual">
+        <svg class="scene-svg" viewBox="0 0 420 380">
+          <!-- Background building -->
+          <rect x="60" y="60" width="300" height="260" rx="8" fill="#F0EBE3" stroke="#E0D8CC" stroke-width="1.5"/>
+          <rect x="60" y="60" width="300" height="40" rx="8" fill="#0D7C66" opacity="0.9"/>
+          <text x="210" y="85" text-anchor="middle" fill="white" font-size="13" font-weight="600" font-family="DM Sans">PASSPORT OFFICE</text>
+          <!-- Windows -->
+          <rect x="85" y="115" width="35" height="30" rx="4" fill="#D4EDE7" class="anim-float"/>
+          <rect x="140" y="115" width="35" height="30" rx="4" fill="#D4EDE7" class="anim-float-d1"/>
+          <rect x="245" y="115" width="35" height="30" rx="4" fill="#D4EDE7" class="anim-float-d2"/>
+          <rect x="300" y="115" width="35" height="30" rx="4" fill="#D4EDE7" class="anim-float-d3"/>
+          <!-- Counter -->
+          <rect x="100" y="200" width="220" height="50" rx="6" fill="#E8E2D9"/>
+          <rect x="110" y="210" width="8" height="30" rx="4" fill="#0D7C66" opacity="0.5"/>
+          <rect x="130" y="210" width="8" height="30" rx="4" fill="#0D7C66" opacity="0.5"/>
+          <!-- Staff behind counter -->
+          <circle cx="160" cy="185" r="12" fill="#D4A843" opacity="0.8"/>
+          <rect x="150" y="195" width="20" height="12" rx="4" fill="#D4A843" opacity="0.6"/>
+          <!-- Queue people -->
+          <g class="anim-float-d1">
+            <circle cx="80" cy="275" r="10" fill="#E8573A" opacity="0.6"/>
+            <rect x="72" y="285" width="16" height="20" rx="5" fill="#E8573A" opacity="0.4"/>
+          </g>
+          <g class="anim-float-d2">
+            <circle cx="120" cy="278" r="10" fill="#7A7062" opacity="0.5"/>
+            <rect x="112" y="288" width="16" height="20" rx="5" fill="#7A7062" opacity="0.35"/>
+          </g>
+          <g class="anim-float-d3">
+            <circle cx="160" cy="280" r="10" fill="#0D7C66" opacity="0.5"/>
+            <rect x="152" y="290" width="16" height="20" rx="5" fill="#0D7C66" opacity="0.35"/>
+          </g>
+          <!-- Main user (highlighted) -->
+          <g class="anim-bounce">
+            <circle cx="210" cy="275" r="14" fill="#0D7C66"/>
+            <rect x="198" y="289" width="24" height="28" rx="7" fill="#0D7C66" opacity="0.85"/>
+            <!-- Question mark -->
+            <text x="210" y="280" text-anchor="middle" fill="white" font-size="14" font-weight="700">?</text>
+          </g>
+          <!-- More queue -->
+          <g class="anim-float">
+            <circle cx="260" cy="280" r="9" fill="#D4A843" opacity="0.5"/>
+            <rect x="253" y="289" width="14" height="18" rx="5" fill="#D4A843" opacity="0.35"/>
+          </g>
+          <g class="anim-float-d1">
+            <circle cx="295" cy="282" r="9" fill="#E8573A" opacity="0.4"/>
+            <rect x="288" y="291" width="14" height="18" rx="5" fill="#E8573A" opacity="0.3"/>
+          </g>
+          <!-- Clock -->
+          <g class="anim-pulse">
+            <circle cx="350" cy="90" r="22" fill="white" stroke="#E8573A" stroke-width="2"/>
+            <line x1="350" y1="90" x2="350" y2="76" stroke="#E8573A" stroke-width="2" stroke-linecap="round"/>
+            <line x1="350" y1="90" x2="360" y2="90" stroke="#1A1A1A" stroke-width="1.5" stroke-linecap="round"/>
+            <circle cx="350" cy="90" r="2" fill="#E8573A"/>
+          </g>
+          <!-- Document stack -->
+          <g class="anim-sway">
+            <rect x="330" y="200" width="40" height="5" rx="2" fill="#E8E2D9" transform="rotate(-5,350,202)"/>
+            <rect x="330" y="207" width="40" height="5" rx="2" fill="#D4A843" opacity="0.5" transform="rotate(2,350,209)"/>
+            <rect x="330" y="214" width="40" height="5" rx="2" fill="#E8E2D9" transform="rotate(-1,350,216)"/>
+            <rect x="330" y="221" width="40" height="5" rx="2" fill="#0D7C66" opacity="0.3" transform="rotate(3,350,223)"/>
+          </g>
+          <!-- Floating alert icon -->
+          <g class="anim-shake" transform="translate(50,140)">
+            <circle cx="0" cy="0" r="16" fill="#FFF0EC" stroke="#E8573A" stroke-width="1.5"/>
+            <text x="0" y="5" text-anchor="middle" fill="#E8573A" font-size="16" font-weight="700">!</text>
+          </g>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== SLIDE 2: Story – User Situation ===== -->
+  <div class="slide" data-slide="1">
+    <div class="slide-inner">
+      <div class="slide-content">
+        <div class="slide-label anim-slide-up">Slide 02 — Meet Priya</div>
+        <h1 class="slide-title anim-slide-up-d1">A Day in the Life<br>of an Applicant</h1>
+        <p class="slide-text anim-slide-up-d2">
+          Priya, a <strong>21-year-old college student</strong>, needs a passport for her first international internship. She wakes up at 5 AM, travels 45 minutes, and joins a queue that snakes outside the building — only to realize she's missing a document.
+        </p>
+        <p class="slide-text anim-slide-up-d3" style="margin-top:12px;">
+          By noon, she's made <strong>three trips</strong> between the counter and a xerox shop, filled a form with no instructions, and still isn't sure if her application is complete.
+        </p>
+      </div>
+      <div class="slide-visual">
+        <svg class="scene-svg" viewBox="0 0 420 380">
+          <!-- Timeline line -->
+          <line x1="60" y1="60" x2="60" y2="340" stroke="#E8E2D9" stroke-width="3" stroke-linecap="round"/>
+          <!-- Step 1: Wake up -->
+          <g class="anim-slide-up">
+            <circle cx="60" cy="80" r="8" fill="#0D7C66"/>
+            <text x="85" y="75" font-size="11" font-weight="700" fill="#0D7C66" font-family="DM Sans">5:00 AM</text>
+            <text x="85" y="92" font-size="12" fill="#7A7062" font-family="DM Sans">Wakes up early, nervous</text>
+            <!-- Sun icon -->
+            <circle cx="340" cy="80" r="14" fill="#D4A843" opacity="0.2" class="anim-pulse"/>
+            <circle cx="340" cy="80" r="8" fill="#D4A843"/>
+          </g>
+          <!-- Step 2: Travel -->
+          <g class="anim-slide-up-d1">
+            <circle cx="60" cy="140" r="8" fill="#0D7C66" opacity="0.8"/>
+            <text x="85" y="135" font-size="11" font-weight="700" fill="#0D7C66" font-family="DM Sans">5:45 AM</text>
+            <text x="85" y="152" font-size="12" fill="#7A7062" font-family="DM Sans">45-min bus ride with documents</text>
+            <!-- Bus icon -->
+            <rect x="310" y="125" width="50" height="28" rx="6" fill="#E8E2D9"/>
+            <rect x="315" y="129" width="12" height="12" rx="2" fill="#D4EDE7"/>
+            <rect x="331" y="129" width="12" height="12" rx="2" fill="#D4EDE7"/>
+            <circle cx="322" cy="157" r="4" fill="#7A7062" opacity="0.5"/>
+            <circle cx="348" cy="157" r="4" fill="#7A7062" opacity="0.5"/>
+          </g>
+          <!-- Step 3: Queue -->
+          <g class="anim-slide-up-d2">
+            <circle cx="60" cy="200" r="8" fill="#E8573A"/>
+            <text x="85" y="195" font-size="11" font-weight="700" fill="#E8573A" font-family="DM Sans">6:30 AM</text>
+            <text x="85" y="212" font-size="12" fill="#7A7062" font-family="DM Sans">Joins a long queue outside</text>
+            <!-- Queue dots -->
+            <circle cx="320" cy="195" r="5" fill="#E8573A" opacity="0.3" class="anim-float"/>
+            <circle cx="340" cy="198" r="5" fill="#E8573A" opacity="0.4" class="anim-float-d1"/>
+            <circle cx="360" cy="195" r="5" fill="#E8573A" opacity="0.5" class="anim-float-d2"/>
+            <circle cx="380" cy="198" r="5" fill="#E8573A" opacity="0.6" class="anim-float-d3"/>
+            <text x="395" y="202" font-size="16" fill="#E8573A" class="anim-bounce">...</text>
+          </g>
+          <!-- Step 4: Counter confusion -->
+          <g class="anim-slide-up-d3">
+            <circle cx="60" cy="260" r="8" fill="#E8573A"/>
+            <text x="85" y="255" font-size="11" font-weight="700" fill="#E8573A" font-family="DM Sans">9:00 AM</text>
+            <text x="85" y="272" font-size="12" fill="#7A7062" font-family="DM Sans">"Missing one document" — sent back</text>
+            <!-- X mark -->
+            <g transform="translate(350,255)">
+              <circle cx="0" cy="0" r="18" fill="#FFF0EC" stroke="#E8573A" stroke-width="1.5" class="anim-shake"/>
+              <line x1="-6" y1="-6" x2="6" y2="6" stroke="#E8573A" stroke-width="2.5" stroke-linecap="round"/>
+              <line x1="6" y1="-6" x2="-6" y2="6" stroke="#E8573A" stroke-width="2.5" stroke-linecap="round"/>
+            </g>
+          </g>
+          <!-- Step 5: Still stuck -->
+          <g style="opacity:0">
+            <circle cx="60" cy="320" r="8" fill="#E8573A" opacity="0.7"/>
+            <text x="85" y="315" font-size="11" font-weight="700" fill="#E8573A" font-family="DM Sans">12:00 PM</text>
+            <text x="85" y="332" font-size="12" fill="#7A7062" font-family="DM Sans">Still unsure if form is complete</text>
+            <g transform="translate(350,315)" class="anim-float-d2">
+              <circle cx="0" cy="0" r="16" fill="white" stroke="#7A7062" stroke-width="1.5"/>
+              <text x="0" y="5" text-anchor="middle" fill="#7A7062" font-size="18" font-weight="700">?</text>
+            </g>
+          </g>
+          <!-- Priya character -->
+          <g transform="translate(200,310)" class="anim-bounce">
+            <circle cx="0" cy="0" r="16" fill="#0D7C66"/>
+            <rect x="-14" y="16" width="28" height="32" rx="8" fill="#0D7C66" opacity="0.85"/>
+            <!-- Sad face -->
+            <circle cx="-4" cy="-3" r="2" fill="white"/>
+            <circle cx="4" cy="-3" r="2" fill="white"/>
+            <path d="M-5,5 Q0,2 5,5" stroke="white" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+          </g>
+          <text x="200" y="365" text-anchor="middle" font-size="10" fill="#0D7C66" font-weight="600" font-family="DM Sans">PRIYA</text>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== SLIDE 3: Story – Pain Points ===== -->
+  <div class="slide" data-slide="2">
+    <div class="slide-inner">
+      <div class="slide-content">
+        <div class="slide-label anim-slide-up">Slide 03 — Pain Points</div>
+        <h1 class="slide-title anim-slide-up-d1">What Really<br>Hurts the User</h1>
+        <p class="slide-text anim-slide-up-d2">
+          Behind every queue is a story of <strong>anxiety, wasted effort, and loss of trust</strong>. These aren't just inconveniences — they erode confidence in the system.
+        </p>
+        <div class="pain-cards">
+          <div class="pain-card anim-slide-up-d2">
+            <div class="pain-icon"><i class="fas fa-file-circle-xmark"></i></div>
+            <div class="pain-text">Unclear document checklist — applicants discover missing papers only at the counter</div>
+          </div>
+          <div class="pain-card anim-slide-up-d3" style="opacity:0">
+            <div class="pain-icon"><i class="fas fa-clock"></i></div>
+            <div class="pain-text">No time estimates — hours of waiting with zero communication or updates</div>
+          </div>
+          <div class="pain-card" style="opacity:0">
+            <div class="pain-icon"><i class="fas fa-headset"></i></div>
+            <div class="pain-text">Unhelpful staff — no one to guide through the form-filling process</div>
+          </div>
+          <div class="pain-card" style="opacity:0">
+            <div class="pain-icon"><i class="fas fa-laptop-code"></i></div>
+            <div class="pain-text">Broken online portal — technical errors force in-person visits anyway</div>
+          </div>
+        </div>
+      </div>
+      <div class="slide-visual">
+        <svg class="scene-svg" viewBox="0 0 420 380">
+          <!-- Central frustrated face -->
+          <g transform="translate(210,130)">
+            <!-- Head -->
+            <circle cx="0" cy="0" r="55" fill="#FFF0EC" stroke="#E8573A" stroke-width="2" class="anim-shake"/>
+            <!-- Eyes (stressed) -->
+            <ellipse cx="-16" cy="-10" rx="7" ry="5" fill="none" stroke="#E8573A" stroke-width="2.5"/>
+            <ellipse cx="16" cy="-10" rx="7" ry="5" fill="none" stroke="#E8573A" stroke-width="2.5"/>
+            <!-- Frown -->
+            <path d="M-18,15 Q0,5 18,15" stroke="#E8573A" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+            <!-- Sweat drop -->
+            <g class="anim-float">
+              <path d="M42,-15 Q46,-25 50,-15 Q46,-8 42,-15Z" fill="#D4EDE7"/>
+            </g>
+          </g>
+          <!-- Radiating pain lines -->
+          <g stroke="#E8573A" stroke-width="1.5" opacity="0.3" stroke-linecap="round">
+            <line x1="120" y1="60" x2="105" y2="45" class="anim-pulse"/>
+            <line x1="300" y1="60" x2="315" y2="45" class="anim-pulse"/>
+            <line x1="145" y1="45" x2="135" y2="28" class="anim-pulse"/>
+            <line x1="275" y1="45" x2="285" y2="28" class="anim-pulse"/>
+            <line x1="210" y1="40" x2="210" y2="22" class="anim-pulse"/>
+          </g>
+          <!-- Stress meter -->
+          <g transform="translate(210,220)">
+            <rect x="-80" y="0" width="160" height="14" rx="7" fill="#F0EBE3"/>
+            <rect x="-80" y="0" width="140" height="14" rx="7" fill="#E8573A" opacity="0.8" class="anim-pulse"/>
+            <text x="0" y="34" text-anchor="middle" font-size="11" fill="#E8573A" font-weight="600" font-family="DM Sans">STRESS LEVEL: HIGH</text>
+          </g>
+          <!-- Floating negative icons -->
+          <g class="anim-float" transform="translate(80,200)">
+            <circle cx="0" cy="0" r="20" fill="white" stroke="#E8E2D9" stroke-width="1.5"/>
+            <text x="0" y="5" text-anchor="middle" font-size="18" fill="#E8573A"><tspan font-family="DM Sans">&#x23F0;</tspan></text>
+            <text x="0" y="30" text-anchor="middle" font-size="9" fill="#7A7062" font-family="DM Sans">Time lost</text>
+          </g>
+          <g class="anim-float-d1" transform="translate(340,200)">
+            <circle cx="0" cy="0" r="20" fill="white" stroke="#E8E2D9" stroke-width="1.5"/>
+            <text x="0" y="5" text-anchor="middle" font-size="18"><tspan font-family="DM Sans">&#x1F4DD;</tspan></text>
+            <text x="0" y="30" text-anchor="middle" font-size="9" fill="#7A7062" font-family="DM Sans">Confusion</text>
+          </g>
+          <g class="anim-float-d2" transform="translate(80,290)">
+            <circle cx="0" cy="0" r="20" fill="white" stroke="#E8E2D9" stroke-width="1.5"/>
+            <text x="0" y="5" text-anchor="middle" font-size="18"><tspan font-family="DM Sans">&#x1F614;</tspan></text>
+            <text x="0" y="30" text-anchor="middle" font-size="9" fill="#7A7062" font-family="DM Sans">Frustration</text>
+          </g>
+          <g class="anim-float-d3" transform="translate(340,290)">
+            <circle cx="0" cy="0" r="20" fill="white" stroke="#E8E2D9" stroke-width="1.5"/>
+            <text x="0" y="5" text-anchor="middle" font-size="18"><tspan font-family="DM Sans">&#x1F4A5;</tspan></text>
+            <text x="0" y="30" text-anchor="middle" font-size="9" fill="#7A7062" font-family="DM Sans">Helplessness</text>
+          </g>
+          <!-- Connecting dashed lines to center -->
+          <line x1="100" y1="200" x2="160" y2="160" stroke="#E8E2D9" stroke-width="1" stroke-dasharray="4,4"/>
+          <line x1="320" y1="200" x2="260" y2="160" stroke="#E8E2D9" stroke-width="1" stroke-dasharray="4,4"/>
+          <line x1="100" y1="290" x2="170" y2="250" stroke="#E8E2D9" stroke-width="1" stroke-dasharray="4,4"/>
+          <line x1="320" y1="290" x2="250" y2="250" stroke="#E8E2D9" stroke-width="1" stroke-dasharray="4,4"/>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== SLIDE 4: Story – Solution Journey ===== -->
+  <div class="slide" data-slide="3">
+    <div class="slide-inner">
+      <div class="slide-content">
+        <div class="slide-label anim-slide-up">Slide 04 — Solution Journey</div>
+        <h1 class="slide-title anim-slide-up-d1">What If It<br>Just Worked?</h1>
+        <p class="slide-text anim-slide-up-d2">
+          Imagine Priya's experience <strong>reimagined</strong>: she checks documents online, books a slot, gets guided through every step — and walks out in under an hour with confidence.
+        </p>
+        <div class="solution-cards anim-slide-up-d3">
+          <div class="solution-card">
+            <i class="fas fa-list-check"></i>
+            <div class="s-title">Smart Document Check</div>
+            <div class="s-desc">Upload and verify documents before visiting — no surprises</div>
+          </div>
+          <div class="solution-card">
+            <i class="fas fa-calendar-check"></i>
+            <div class="s-title">Slot Booking</div>
+            <div class="s-desc">Choose a time, get real-time queue updates via SMS</div>
+          </div>
+          <div class="solution-card">
+            <i class="fas fa-mobile-screen-button"></i>
+            <div class="s-title">Guided Form Filling</div>
+            <div class="s-desc">Step-by-step interface with tooltips and auto-fill</div>
+          </div>
+          <div class="solution-card">
+            <i class="fas fa-robot"></i>
+            <div class="s-title">Help Desk + Chatbot</div>
+            <div class="s-desc">On-site kiosks and AI assistant for instant answers</div>
+          </div>
+        </div>
+      </div>
+      <div class="slide-visual">
+        <svg class="scene-svg" viewBox="0 0 420 380">
+          <!-- Phone mockup -->
+          <g transform="translate(140,30)">
+            <rect x="0" y="0" width="140" height="280" rx="20" fill="#1A1A1A"/>
+            <rect x="6" y="20" width="128" height="240" rx="4" fill="white"/>
+            <!-- Status bar -->
+            <rect x="6" y="20" width="128" height="18" fill="#0D7C66"/>
+            <text x="70" y="33" text-anchor="middle" fill="white" font-size="9" font-weight="600" font-family="DM Sans">Passport Apply</text>
+            <!-- Step indicators -->
+            <g transform="translate(20,52)">
+              <circle cx="0" cy="0" r="8" fill="#0D7C66" class="anim-glow"/>
+              <polyline points="-3,0 -1,3 4,-3" stroke="white" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round" class="anim-check"/>
+              <text x="14" y="4" font-size="8" fill="#0D7C66" font-weight="600" font-family="DM Sans">Documents</text>
+              <line x1="55" y1="0" x2="75" y2="0" stroke="#0D7C66" stroke-width="1.5"/>
+              <circle cx="90" cy="0" r="8" fill="#0D7C66" class="anim-glow"/>
+              <polyline points="87,0 89,3 94,-3" stroke="white" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round" class="anim-check"/>
+            </g>
+            <g transform="translate(20,82)">
+              <circle cx="90" cy="0" r="8" fill="#0D7C66" class="anim-glow"/>
+              <polyline points="87,0 89,3 94,-3" stroke="white" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round" class="anim-check"/>
+              <text x="14" y="4" font-size="8" fill="#0D7C66" font-weight="600" font-family="DM Sans">Form</text>
+              <line x1="55" y1="0" x2="75" y2="0" stroke="#0D7C66" stroke-width="1.5"/>
+            </g>
+            <g transform="translate(20,112)">
+              <circle cx="0" cy="0" r="8" fill="#D4A843" class="anim-pulse"/>
+              <text x="0" y="3" text-anchor="middle" fill="white" font-size="8" font-weight="700">3</text>
+              <text x="14" y="4" font-size="8" fill="#D4A843" font-weight="600" font-family="DM Sans">Slot Book</text>
+              <line x1="55" y1="0" x2="75" y2="0" stroke="#E8E2D9" stroke-width="1.5"/>
+              <circle cx="90" cy="0" r="8" fill="#E8E2D9"/>
+            </g>
+            <!-- Form preview -->
+            <rect x="16" y="135" width="108" height="60" rx="6" fill="#F7F5F1"/>
+            <rect x="22" y="142" width="50" height="4" rx="2" fill="#D4A843" opacity="0.5"/>
+            <rect x="22" y="152" width="96" height="6" rx="2" fill="#E8E2D9"/>
+            <rect x="22" y="163" width="80" height="6" rx="2" fill="#E8E2D9"/>
+            <rect x="22" y="174" width="90" height="6" rx="2" fill="#E8E2D9"/>
+            <!-- Tooltip -->
+            <g transform="translate(70,132)" class="anim-float">
+              <rect x="-30" y="-22" width="60" height="16" rx="4" fill="#0D7C66"/>
+              <polygon points="-5,-6 5,-6 0,0" fill="#0D7C66"/>
+              <text x="0" y="-11" text-anchor="middle" fill="white" font-size="7" font-family="DM Sans">Auto-filled!</text>
+            </g>
+            <!-- CTA button -->
+            <rect x="20" y="210" width="100" height="30" rx="8" fill="#0D7C66" class="anim-glow"/>
+            <text x="70" y="229" text-anchor="middle" fill="white" font-size="10" font-weight="600" font-family="DM Sans">Book Slot</text>
+            <!-- Home indicator -->
+            <rect x="50" y="262" width="40" height="4" rx="2" fill="#E8E2D9"/>
+          </g>
+          <!-- Happy Priya beside phone -->
+          <g transform="translate(60,190)" class="anim-bounce">
+            <circle cx="0" cy="0" r="22" fill="#0D7C66"/>
+            <rect x="-18" y="22" width="36" height="40" rx="10" fill="#0D7C66" opacity="0.85"/>
+            <!-- Happy face -->
+            <circle cx="-6" cy="-4" r="2.5" fill="white"/>
+            <circle cx="6" cy="-4" r="2.5" fill="white"/>
+            <path d="M-8,6 Q0,14 8,6" stroke="white" stroke-width="2" fill="none" stroke-linecap="round"/>
+          </g>
+          <text x="60" y="260" text-anchor="middle" font-size="10" fill="#0D7C66" font-weight="600" font-family="DM Sans">HAPPY</text>
+          <!-- Sparkles -->
+          <g class="anim-star-1" transform="translate(320,70)">
+            <polygon points="0,-8 2,-2 8,-2 3,2 5,8 0,4 -5,8 -3,2 -8,-2 -2,-2" fill="#D4A843"/>
+          </g>
+          <g class="anim-star-2" transform="translate(360,140)">
+            <polygon points="0,-6 1.5,-1.5 6,-1.5 2.5,1.5 3.5,6 0,3 -3.5,6 -2.5,1.5 -6,-1.5 -1.5,-1.5" fill="#0D7C66" opacity="0.6"/>
+          </g>
+          <g class="anim-star-3" transform="translate(340,220)">
+            <polygon points="0,-5 1,-1 5,-1 2,1 3,5 0,2.5 -3,5 -2,1 -5,-1 -1,-1" fill="#D4A843" opacity="0.5"/>
+          </g>
+          <!-- Time saved badge -->
+          <g transform="translate(330,300)" class="anim-float-d1">
+            <rect x="-40" y="-16" width="80" height="32" rx="16" fill="#E8F5F1" stroke="#0D7C66" stroke-width="1.5"/>
+            <text x="0" y="5" text-anchor="middle" font-size="11" fill="#0D7C66" font-weight="700" font-family="DM Sans">< 1 hour</text>
+          </g>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== SLIDE 5: Point of View ===== -->
+  <div class="slide" data-slide="4">
+    <div class="slide-inner">
+      <div class="slide-content">
+        <div class="slide-label anim-slide-up">Slide 05 — Point of View</div>
+        <h1 class="slide-title anim-slide-up-d1">A System That<br>Respects Your Time</h1>
+        <p class="slide-text anim-slide-up-d2">
+          By putting the <strong>user's emotional journey</strong> at the center of design — not just the process — we transform a stressful ordeal into a confident, efficient experience.
+        </p>
+        <div class="pov-box anim-slide-up-d3">
+          <p class="pov-statement">
+            "Priya needs a clear, guided passport registration experience because spending an entire day in confusion erodes trust in public services and discourages young citizens from pursuing global opportunities."
+          </p>
+          <div class="benefit-row">
+            <div class="benefit-tag"><i class="fas fa-bolt" style="font-size:12px"></i> Time-saving</div>
+            <div class="benefit-tag"><i class="fas fa-heart" style="font-size:12px"></i> User-friendly</div>
+            <div class="benefit-tag"><i class="fas fa-brain" style="font-size:12px"></i> Reduced stress</div>
+            <div class="benefit-tag"><i class="fas fa-chart-line" style="font-size:12px"></i> Efficient</div>
+          </div>
+        </div>
+      </div>
+      <div class="slide-visual">
+        <svg class="scene-svg" viewBox="0 0 420 380">
+          <!-- Before vs After comparison -->
+          <!-- Before box -->
+          <g transform="translate(30,30)">
+            <rect x="0" y="0" width="170" height="150" rx="12" fill="#FFF0EC" stroke="#E8573A" stroke-width="1.5" opacity="0.8"/>
+            <text x="85" y="28" text-anchor="middle" font-size="12" font-weight="700" fill="#E8573A" font-family="DM Sans">BEFORE</text>
+            <line x1="20" y1="38" x2="150" y2="38" stroke="#E8573A" stroke-width="0.5" opacity="0.3"/>
+            <!-- Sad face small -->
+            <g transform="translate(45,75)">
+              <circle cx="0" cy="0" r="16" fill="white" stroke="#E8573A" stroke-width="1.5"/>
+              <circle cx="-4" cy="-3" r="2" fill="#E8573A"/>
+              <circle cx="4" cy="-3" r="2" fill="#E8573A"/>
+              <path d="M-5,5 Q0,2 5,5" stroke="#E8573A" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+            </g>
+            <!-- Stats -->
+            <text x="85" y="115" text-anchor="middle" font-size="10" fill="#7A7062" font-family="DM Sans">3–5 hours wasted</text>
+            <text x="85" y="130" text-anchor="middle" font-size="10" fill="#7A7062" font-family="DM Sans">Multiple visits</text>
+            <text x="85" y="145" text-anchor="middle" font-size="10" fill="#E8573A" font-weight="600" font-family="DM Sans">High stress</text>
+            <!-- X icon -->
+            <g transform="translate(130,55)" class="anim-shake">
+              <circle cx="0" cy="0" r="10" fill="#E8573A" opacity="0.15"/>
+              <line x1="-4" y1="-4" x2="4" y2="4" stroke="#E8573A" stroke-width="2" stroke-linecap="round"/>
+              <line x1="4" y1="-4" x2="-4" y2="4" stroke="#E8573A" stroke-width="2" stroke-linecap="round"/>
+            </g>
+          </g>
+
+          <!-- Arrow -->
+          <g transform="translate(215,95)" class="anim-bounce">
+            <line x1="0" y1="0" x2="30" y2="0" stroke="#0D7C66" stroke-width="2.5" stroke-linecap="round"/>
+            <polyline points="22,-6 30,0 22,6" stroke="#0D7C66" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+          </g>
+
+          <!-- After box -->
+          <g transform="translate(250,30)">
+            <rect x="0" y="0" width="170" height="150" rx="12" fill="#E8F5F1" stroke="#0D7C66" stroke-width="1.5"/>
+            <text x="85" y="28" text-anchor="middle" font-size="12" font-weight="700" fill="#0D7C66" font-family="DM Sans">AFTER</text>
+            <line x1="20" y1="38" x2="150" y2="38" stroke="#0D7C66" stroke-width="0.5" opacity="0.3"/>
+            <!-- Happy face small -->
+            <g transform="translate(45,75)">
+              <circle cx="0" cy="0" r="16" fill="white" stroke="#0D7C66" stroke-width="1.5"/>
+              <circle cx="-4" cy="-3" r="2" fill="#0D7C66"/>
+              <circle cx="4" cy="-3" r="2" fill="#0D7C66"/>
+              <path d="M-5,3 Q0,9 5,3" stroke="#0D7C66" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+            </g>
+            <!-- Stats -->
+            <text x="85" y="115" text-anchor="middle" font-size="10" fill="#7A7062" font-family="DM Sans">Under 1 hour</text>
+            <text x="85" y="130" text-anchor="middle" font-size="10" fill="#7A7062" font-family="DM Sans">Single visit</text>
+            <text x="85" y="145" text-anchor="middle" font-size="10" fill="#0D7C66" font-weight="600" font-family="DM Sans">Confident</text>
+            <!-- Check icon -->
+            <g transform="translate(130,55)" class="anim-glow">
+              <circle cx="0" cy="0" r="10" fill="#0D7C66" opacity="0.15"/>
+              <polyline points="-4,0 -1,4 5,-4" stroke="#0D7C66" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+            </g>
+          </g>
+
+          <!-- Impact summary at bottom -->
+          <g transform="translate(210,240)">
+            <rect x="-160" y="0" width="320" height="100" rx="14" fill="white" stroke="#E8E2D9" stroke-width="1.5" box-shadow="0 2px 12px rgba(0,0,0,0.05)"/>
+            <!-- Impact metrics -->
+            <g transform="translate(-100,30)">
+              <g class="anim-star-1">
+                <circle cx="0" cy="0" r="20" fill="#E8F5F1"/>
+                <text x="0" y="1" text-anchor="middle" font-size="13" fill="#0D7C66" font-weight="700" font-family="DM Sans" dominant-baseline="middle">80%</text>
+              </g>
+              <text x="0" y="35" text-anchor="middle" font-size="9" fill="#7A7062" font-family="DM Sans">Less time</text>
+            </g>
+            <g transform="translate(0,30)">
+              <g class="anim-star-2">
+                <circle cx="0" cy="0" r="20" fill="#E8F5F1"/>
+                <text x="0" y="1" text-anchor="middle" font-size="13" fill="#0D7C66" font-weight="700" font-family="DM Sans" dominant-baseline="middle">1x</text>
+              </g>
+              <text x="0" y="35" text-anchor="middle" font-size="9" fill="#7A7062" font-family="DM Sans">Visit only</text>
+            </g>
+            <g transform="translate(100,30)">
+              <g class="anim-star-3">
+                <circle cx="0" cy="0" r="20" fill="#E8F5F1"/>
+                <text x="0" y="1" text-anchor="middle" font-size="13" fill="#0D7C66" font-weight="700" font-family="DM Sans" dominant-baseline="middle">4.8</text>
+              </g>
+              <text x="0" y="35" text-anchor="middle" font-size="9" fill="#7A7062" font-family="DM Sans">Satisfaction</text>
+            </g>
+          </g>
+
+          <!-- Final sparkle burst -->
+          <g class="anim-star-1" transform="translate(50,350)">
+            <polygon points="0,-5 1,-1 5,-1 2,1 3,5 0,2.5 -3,5 -2,1 -5,-1 -1,-1" fill="#D4A843" opacity="0.4"/>
+          </g>
+          <g class="anim-star-2" transform="translate(380,350)">
+            <polygon points="0,-5 1,-1 5,-1 2,1 3,5 0,2.5 -3,5 -2,1 -5,-1 -1,-1" fill="#0D7C66" opacity="0.3"/>
+          </g>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  // Presentation controller
+  const slides = document.querySelectorAll('.slide');
+  const totalSlides = slides.length;
+  let currentSlide = 0;
+  let isAnimating = false;
+
+  const progressBar = document.getElementById('progressBar');
+  const currentNum = document.getElementById('currentNum');
+  const prevBtn = document.getElementById('prevBtn');
+  const nextBtn = document.getElementById('nextBtn');
+  const dotsContainer = document.getElementById('slideDots');
+
+  // Create dots
+  for (let i = 0; i < totalSlides; i++) {
+    const dot = document.createElement('button');
+    dot.className = 'slide-dot' + (i === 0 ? ' active' : '');
+    dot.setAttribute('aria-label', `Go to slide ${i + 1}`);
+    dot.addEventListener('click', () => goToSlide(i));
+    dotsContainer.appendChild(dot);
+  }
+
+  function updateUI() {
+    // Progress bar
+    progressBar.style.width = ((currentSlide + 1) / totalSlides * 100) + '%';
+
+    // Counter
+    currentNum.textContent = currentSlide + 1;
+
+    // Dots
+    document.querySelectorAll('.slide-dot').forEach((dot, i) => {
+      dot.classList.toggle('active', i === currentSlide);
+    });
+
+    // Arrow states
+    prevBtn.disabled = currentSlide === 0;
+    nextBtn.disabled = currentSlide === totalSlides - 1;
+  }
+
+  function goToSlide(index) {
+    if (isAnimating || index === currentSlide || index < 0 || index >= totalSlides) return;
+    isAnimating = true;
+
+    const direction = index > currentSlide ? 1 : -1;
+    const currentEl = slides[currentSlide];
+    const nextEl = slides[index];
+
+    // Reset animations on the incoming slide elements
+    nextEl.querySelectorAll('[class*="anim-slide-up"], [class*="anim-star"], [class*="anim-check"]').forEach(el => {
+      el.style.animation = 'none';
+      el.offsetHeight; // force reflow
+      el.style.animation = '';
+    });
+
+    // Animate out
+    currentEl.classList.remove('active');
+    currentEl.classList.add(direction > 0 ? 'exit-left' : '');
+    if (direction < 0) {
+      currentEl.style.transform = 'translateX(60px)';
+      currentEl.style.opacity = '0';
+    }
+
+    // Animate in
+    nextEl.style.transform = direction > 0 ? 'translateX(60px)' : 'translateX(-60px)';
+    nextEl.style.opacity = '0';
+    nextEl.offsetHeight;
+
+    requestAnimationFrame(() => {
+      nextEl.classList.add('active');
+      nextEl.style.transform = '';
+      nextEl.style.opacity = '';
+    });
+
+    currentSlide = index;
+    updateUI();
+
+    setTimeout(() => {
+      currentEl.classList.remove('exit-left');
+      currentEl.style.transform = '';
+      currentEl.style.opacity = '';
+      isAnimating = false;
+    }, 700);
+  }
+
+  prevBtn.addEventListener('click', () => goToSlide(currentSlide - 1));
+  nextBtn.addEventListener('click', () => goToSlide(currentSlide + 1));
+
+  // Keyboard navigation
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+      e.preventDefault();
+      goToSlide(currentSlide + 1);
+    } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+      e.preventDefault();
+      goToSlide(currentSlide - 1);
+    }
+  });
+
+  // Touch/swipe support
+  let touchStartX = 0;
+  let touchStartY = 0;
+  document.addEventListener('touchstart', (e) => {
+    touchStartX = e.changedTouches[0].screenX;
+    touchStartY = e.changedTouches[0].screenY;
+  }, { passive: true });
+
+  document.addEventListener('touchend', (e) => {
+    const diffX = touchStartX - e.changedTouches[0].screenX;
+    const diffY = touchStartY - e.changedTouches[0].screenY;
+    if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 50) {
+      if (diffX > 0) goToSlide(currentSlide + 1);
+      else goToSlide(currentSlide - 1);
+    }
+  }, { passive: true });
+
+  // Initialize
+  updateUI();
+</script>
+
+</body>
+</html>
